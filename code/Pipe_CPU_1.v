@@ -22,6 +22,14 @@ input rst_i;
 /****************************************
 Internal signal
 ****************************************/
+
+/*For PC Module*/
+wire [32-1:0] pc_number;
+wire [32-1:0] pc_number_next;
+wire [32-1:0] pc_number_in;
+wire [32-1:0] pc_plus_four;
+
+
 /**** IF stage ****/
 
 
@@ -54,7 +62,11 @@ MUX_2to1 Mux1(
 		);
 
 ProgramCounter PC(
-
+	.clk_i(clk_i),
+	.rst_i (rst_i),
+	.pc_in_i(pc_number_in),
+	//.pc_in_i(pc_number_next),
+	.pc_out_o(pc_number)
         );
 
 Instr_Memory IM(
