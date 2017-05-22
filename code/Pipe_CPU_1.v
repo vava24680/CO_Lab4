@@ -150,6 +150,7 @@ Instnatiate modules
 ****************************************/
 wire fake_jump_type;
 //Instantiate the components in IF stage
+
 //First MUX, for selecting next pc number
 MUX_2to1 #(.size(32)) PC_num_MUX(
 	.data0_i(pc_plus_four),
