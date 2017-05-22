@@ -2,7 +2,7 @@
 //--------------------------------------------------------------------------------
 //Version:     1
 //--------------------------------------------------------------------------------
-//Writer:0416315王定偉、0416005張彧豪
+//Writer:0416315�����416005張彧��
 //----------------------------------------------
 //Date:
 //----------------------------------------------
@@ -38,8 +38,18 @@ wire        [32-1:0] RSdata_o;
 wire        [32-1:0] RTdata_o;
 
 //Read the data
-assign RSdata_o = Reg_File[RSaddr_i] ;
-assign RTdata_o = Reg_File[RTaddr_i] ;
+/*Must do this*/
+/*
+Since if in one clock if we want to fetch some reg_file which is going to be writen a new value,
+the new value isn't set well until new clock edge, so the old syntax will fetch the old value in that reg_file.
+The meaning of new syntax is that if we want to fetch some reg_file which is going to be writen a new value in
+, we just assign the output data as the the new value which is going to be writen in a reg_file in thie cycle.
+*/
+//assign RSdata_o = Reg_File[RSaddr_i] ;
+assign RSdata_o = RSaddr_i==RDaddr_i ? RDdata_i : Reg_File[RSaddr_i];
+//assign RTdata_o = Reg_File[RTaddr_i] ;
+assign RTdata_o = RTaddr_i==RDaddr_i ? RDdata_i : Reg_File[RTaddr_i];/*-*/
+/*----------------------------------------------------------------------*/
 
 //Writing data when postive edge clk_i and RegWrite_i was set.
 always @( posedge rst_i or posedge clk_i  ) begin
@@ -51,9 +61,10 @@ always @( posedge rst_i or posedge clk_i  ) begin
         Reg_File[16] <= 0; Reg_File[17] <= 0; Reg_File[18] <= 0; Reg_File[19] <= 0;
         Reg_File[20] <= 0; Reg_File[21] <= 0; Reg_File[22] <= 0; Reg_File[23] <= 0;
         Reg_File[24] <= 0; Reg_File[25] <= 0; Reg_File[26] <= 0; Reg_File[27] <= 0;
-        Reg_File[28] <= 0; Reg_File[29] <= 32'd128; Reg_File[30] <= 0; Reg_File[31] <= 0;
+        Reg_File[28] <= 0; Reg_File[29] <= 0; Reg_File[30] <= 0; Reg_File[31] <= 0;
 	end
-    else begin
+    else
+	begin
         if(RegWrite_i)
 			if(RDaddr_i!=32'd0)
             	Reg_File[RDaddr_i] <= RDdata_i;
