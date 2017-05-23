@@ -67,14 +67,15 @@ Internal signal
 	ALU_op_o,ALUSrc_2_select_o,RegWrite_o,RegDst_o};
 /**** ID stage End****/
 
-/*------For ID/EX Reg out------*/
+/*------For ID/EX Reg out------Total 189 bits*/
 	wire [14-1:0] control_IDEX_o;
 	wire [32-1:0] pc_plus_four_IDEX_o;
 	wire [32-1:0] shamt_IDEX_o;
 	wire [32-1:0] RSdata_IDEX_o;
 	wire [32-1:0] RTdata_IDEX_o;
 	wire [32-1:0] SE_data_IDEX_o;
-	wire [5-1:0] RDaddr_1_IDEX_o;
+	wire [5-1:0] RSaddr_IDEX_o;
+	wire [5-1:0] RTaddr_IDEX_o;//also known as RDaddr_1_IDEX_o
 	wire [5-1:0] RDaddr_2_IDEX_o;
 /*#############################*/
 
@@ -122,11 +123,13 @@ Internal signal
 	wire [2-1:0] BranchType_MEM;
 	wire MemRead_MEM;
 	wire MemWrite_MEM;
+	wire RegWrite_MEM;
 	wire [3-1:0] control_MEMWB_i;
 	assign Branch_MEM = control_EXMEM_o[7];
 	assign BranchType_MEM = control_EXMEM_o[4:3];
 	assign MemRead_MEM = control_EXMEM_o[2];
 	assign MemWrite_MEM = control_EXMEM_o[1];
+	assign RegWrite_MEM = control_EXMEM_o[0];
 	assign control_MEMWB_i = {control_EXMEM_o[6:5],control_EXMEM_o[0]};
 	//control_MEMWB_i = {MemToReg_o,RegWrite_o}
 /**** MEM stage End ****/
@@ -142,10 +145,10 @@ Internal signal
 /**** WB stage ****/
 	wire [32-1:0] WriteData_o;
 //control signal
-	wire [2-1:0] MemToReg_MEM;
-	wire RegWrite_MEM;
-	assign MemToReg_MEM = control_MEMWB_o[2:1];
-	assign RegWrite_MEM = control_MEMWB_o[0];
+	wire [2-1:0] MemToReg_WB;
+	wire RegWrite_WB;
+	assign MemToReg_WB = control_MEMWB_o[2:1];
+	assign RegWrite_WB = control_MEMWB_o[0];
 /****************************************
 Instnatiate modules
 ****************************************/
@@ -194,7 +197,7 @@ Reg_File RF(
 	.RTaddr_i(IFID_o[20:16]),
 	.RDaddr_i(WriteReg_MEMWB_o),//Come from MEM/WB reg
 	.RDdata_i(WriteData_o),//Come from the MUX in MEM/WB stage
-	.RegWrite_i(RegWrite_MEM),//Come from MEM/WB reg,control signal
+	.RegWrite_i(RegWrite_WB),//Come from MEM/WB reg,control signal
 	.RSdata_o(RSdata_o),
 	.RTdata_o(RTdata_o),
 	.pre_equal_o(pre_equal_o)
@@ -218,13 +221,20 @@ Sign_Extend Sign_Extend(
 	.data_o(SE_data_o)
 	);
 
+/*
 Pipe_Reg #(.size(184)) ID_EX(
 	.clk_i(clk_i),
 	.rst_i(rst_i),
 	.data_i({control_IDEX_i,IFID_o[63:32],shamt,RSdata_o,RTdata_o,SE_data_o,IFID_o[20:16],IFID_o[15:11]}),
-	.data_o({control_IDEX_o,pc_plus_four_IDEX_o,shamt_IDEX_o,RSdata_IDEX_o,RTdata_IDEX_o,SE_data_IDEX_o,RDaddr_1_IDEX_o,RDaddr_2_IDEX_o})
+	.data_o({control_IDEX_o,pc_plus_four_IDEX_o,shamt_IDEX_o,RSdata_IDEX_o,RTdata_IDEX_o,SE_data_IDEX_o,RTaddr_IDEX_o,RDaddr_2_IDEX_o})
 	);
-
+*/
+Pipe_Reg #(.size(189)) ID_EX(
+	.clk_i(clk_i),
+	.rst_i(rst_i),
+	.data_i({control_IDEX_i,IFID_o[63:32],shamt,RSdata_o,RTdata_o,SE_data_o,IFID_o[25:21],IFID_o[20:16],IFID_o[15:11]}),
+	.data_o({control_IDEX_o,pc_plus_four_IDEX_o,shamt_IDEX_o,RSdata_IDEX_o,RTdata_IDEX_o,SE_data_IDEX_o,RSaddr_IDEX_o,RTaddr_IDEX_o,RDaddr_2_IDEX_o})
+	);
 /*
 -----In------
 Branch_o,1
@@ -270,7 +280,7 @@ MUX_2to1 #(.size(32)) Mux_ALUSrc_2(
 	);
 //Forth MUX, for selecting Reg_dst
 MUX_4to1 #(.size(5)) Mux_RegDst_Select(
-	.data0_i(RDaddr_1_IDEX_o),
+	.data0_i(RTaddr_IDEX_o),
 	.data1_i(RDaddr_2_IDEX_o),
 	.data2_i(5'd31),
 	.data3_i(5'd0),
@@ -333,7 +343,7 @@ MUX_4to1 #(.size(32)) Mux_WriteData_Select(
 	.data1_i(MEM_Read_data_MEMWB_o),
 	.data2_i(SE_data_MEMWB_o),
 	.data3_i(32'd0),
-	.select_i(MemToReg_MEM),
+	.select_i(MemToReg_WB),
 	.data_o(WriteData_o)
 	);
 
