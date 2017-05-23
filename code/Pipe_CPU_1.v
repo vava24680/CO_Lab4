@@ -268,7 +268,7 @@ ALU_Ctrl ALU_Ctrl(
 	.ALUSrc_1_o(ALUSrc_1_select_o),
 	.Jump_type(fake_jump_type)
 	);
-Forwaring_Unit FWU(
+Forwarding_Unit FWU(
 	.WriteReg_EXMEM_o(WriteReg_EXMEM_o),
 	.WriteReg_MEMWB_o(WriteReg_EXMEM_o),
 	.RegWrite_MEM(RegWrite_MEM),
