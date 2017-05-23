@@ -91,7 +91,11 @@ Internal signal
 	wire [32-1:0] SLL_data_o;
 	/*For Adder_For_BranchTarget*/
 	wire [32-1:0] Branch_target_o;
+	wire [32-1:0] opd_1_o;
+	wire [32-1:0] opd_2_o;
 //control signal
+	wire [2-1:0] Src1_Forward_select_o;
+	wire [2-1:0] Src2_Forward_select_o;
 	wire ALUSrc_2_select_EX = control_IDEX_o[3];
 	wire [3-1:0] ALU_op_EX = control_IDEX_o[6:4];
 	wire [2-1:0] RegDst_EX = control_IDEX_o[1:0];
@@ -264,21 +268,49 @@ ALU_Ctrl ALU_Ctrl(
 	.ALUSrc_1_o(ALUSrc_1_select_o),
 	.Jump_type(fake_jump_type)
 	);
-//Second MUX, for selecting ALU_src_1
-MUX_2to1 #(.size(32)) Mux_ALUSrc_1(
+Forwaring_Unit FWU(
+	.WriteReg_EXMEM_o(WriteReg_EXMEM_o),
+	.WriteReg_MEMWB_o(WriteReg_EXMEM_o),
+	.RegWrite_MEM(RegWrite_MEM),
+	.RegWrite_WB(RegWrite_WB),
+	.RSaddr_IDEX_o(RSaddr_IDEX_o),
+	.RTaddr_IDEX_o(RTaddr_IDEX_o),
+	.Src1_Forward_select_o(Src1_Forward_select_o),
+	.Src2_Forward_select_o(Src2_Forward_select_o)
+	);
+//Second MUX, for operand 1 Forwaring
+MUX_4to1 #(.size(32)) Mux_Opd_1_select(
 	.data0_i(RSdata_IDEX_o),
+	.data1_i(ALU_result_EXMEM_o),
+	.data2_i(ALU_result_MEMWB_o),
+	.data3_i(32'd0),
+	.select_i(Src1_Forward_select_o),
+	.data_o(opd_1_o)
+	);
+//Third MUX, for operand 2 Forwaring
+MUX_4to1 #(.size(32)) Mux_Opd_2_select(
+	.data0_i(RTdata_IDEX_o),
+	.data1_i(ALU_result_EXMEM_o),
+	.data2_i(ALU_result_MEMWB_o),
+	.data3_i(32'd0),
+	.select_i(Src2_Forward_select_o),
+	.data_o(opd_2_o)
+	);
+//Forth MUX, for selecting ALU_src_1
+MUX_2to1 #(.size(32)) Mux_ALUSrc_1(
+	.data0_i(opd_1_o/*RSdata_IDEX_o*/),
 	.data1_i(shamt_IDEX_o),
 	.select_i(ALUSrc_1_select_o),
 	.data_o(ALU_src_1)
 	);
-//Third MUX, for selecting ALU_src_2
+//Fifth MUX, for selecting ALU_src_2
 MUX_2to1 #(.size(32)) Mux_ALUSrc_2(
-	.data0_i(RTdata_IDEX_o),
+	.data0_i(opd_2_o/*RTdata_IDEX_o*/),
 	.data1_i(SE_data_IDEX_o),
 	.select_i(ALUSrc_2_select_EX),
 	.data_o(ALU_src_2)
 	);
-//Forth MUX, for selecting Reg_dst
+//Sixth MUX, for selecting Reg_dst
 MUX_4to1 #(.size(5)) Mux_RegDst_Select(
 	.data0_i(RTaddr_IDEX_o),
 	.data1_i(RDaddr_2_IDEX_o),
@@ -320,7 +352,7 @@ Data_Memory DM(
 	.MemWrite_i(MemWrite_MEM),
 	.data_o(MEM_Read_data_o)
 	);
-//Fifth MUX, for selecting the right branch type
+//Seventh MUX, for selecting the right branch type
 MUX_4to1 #(.size(1)) Mux_Branch_Type(
 	.data0_i(zero_EXMEM_o),
 	.data1_i(zero_EXMEM_o|ALU_result_EXMEM_o[31]),
@@ -351,4 +383,3 @@ MUX_4to1 #(.size(32)) Mux_WriteData_Select(
 signal assignment
 ****************************************/
 endmodule
-
