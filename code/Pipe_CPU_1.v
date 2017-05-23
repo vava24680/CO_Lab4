@@ -61,6 +61,7 @@ Internal signal
 	wire [2-1:0] RegDst_o;
 	//wire Jump_type;//MUX eight is not used this time
 	/*##########################*/
+	wire pre_equal_o;
 	wire [14-1:0] control_IDEX_i;
 	assign control_IDEX_i = {Branch_o,MemToReg_o,BranchType_o,MemRead_o,MemWrite_o,
 	ALU_op_o,ALUSrc_2_select_o,RegWrite_o,RegDst_o};
@@ -195,7 +196,8 @@ Reg_File RF(
 	.RDdata_i(WriteData_o),//Come from the MUX in MEM/WB stage
 	.RegWrite_i(RegWrite_MEM),//Come from MEM/WB reg,control signal
 	.RSdata_o(RSdata_o),
-	.RTdata_o(RTdata_o)
+	.RTdata_o(RTdata_o),
+	.pre_equal_o(pre_equal_o)
 	);
 
 Decoder Control(
