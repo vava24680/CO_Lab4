@@ -2,7 +2,7 @@
 //--------------------------------------------------------------------------------
 //Version:     1
 //--------------------------------------------------------------------------------
-//Writer:0416315�����416005張彧��
+//Writer:0416315王定偉0416005張彧豪
 //----------------------------------------------
 //Date:
 //----------------------------------------------
@@ -17,7 +17,8 @@ module Reg_File(
     RDdata_i,
     RegWrite_i,
     RSdata_o,
-    RTdata_o
+    RTdata_o,
+	pre_equal_o
     );
 
 //I/O ports
@@ -28,7 +29,7 @@ input  [5-1:0]  RSaddr_i;
 input  [5-1:0]  RTaddr_i;
 input  [5-1:0]  RDaddr_i;
 input  [32-1:0] RDdata_i;
-
+input pre_equal_o;
 output [32-1:0] RSdata_o;
 output [32-1:0] RTdata_o;
 
@@ -50,6 +51,8 @@ assign RSdata_o = RSaddr_i==RDaddr_i ? RDdata_i : Reg_File[RSaddr_i];
 //assign RTdata_o = Reg_File[RTaddr_i] ;
 assign RTdata_o = RTaddr_i==RDaddr_i ? RDdata_i : Reg_File[RTaddr_i];/*-*/
 /*----------------------------------------------------------------------*/
+assign pre_equal_o = (RSdata_o==RTdata_o) ? 1'b1 : 1'b0;
+
 
 //Writing data when postive edge clk_i and RegWrite_i was set.
 always @( posedge rst_i or posedge clk_i  ) begin
