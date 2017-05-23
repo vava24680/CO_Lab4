@@ -1,4 +1,4 @@
-module Forwaring_Unit(
+module Forwarding_Unit(
 	WriteReg_EXMEM_o,
 	WriteReg_MEMWB_o,
 	RegWrite_MEM,
@@ -48,7 +48,7 @@ always @ ( * ) begin
 		begin
 			Src1_Forward_select_o = 2'b00;
 		end
-		
+
 	//Case2, WriteReg_EXMEM_o has data dependency with RTaddr_IDEX_o
 	if(WriteReg_EXMEM_o==RTaddr_IDEX_o)
 		begin
