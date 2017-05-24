@@ -37,6 +37,12 @@ Internal signal
 /*#############################*/
 
 /**** ID stage ****/
+	//
+	wire [32-1:0] instruction_IFID_o;
+	wire [6-1:0] opcode_IFID_o;
+	wire [5-1:0] RSaddr_IFID_o;
+	wire [5-1:0] RTaddr_IFID_o;
+	wire [16-1:0] Second_half_instr_IFID_o;
 	/*----For Reg_File Module----*/
 	wire [32-1:0] RSdata_o;
 	wire [32-1:0] RTdata_o;
@@ -44,8 +50,14 @@ Internal signal
 	/*----For Sign_Extend Module Module----*/
 	wire [32-1:0] SE_data_o;
 	/*-------------------------------------*/
+	wire [32-1:0] pc_plus_four_IFID_o;
 	wire [32-1:0] shamt;
 	assign shamt = {27'b0,IFID_o[10:6]};
+	assign opcode_IFID_o = instruction_IFID_o[31:26];
+	assign RSaddr_IFID_o = instruction_IFID_o[25:21];
+	assign RTaddr_IFID_o = instruction_IFID_o[20:16];
+	assign RTaddr_IFID_o = instruction_IFID_o[15:11];
+	assign Second_half_instr_IFID_o = instruction_IFID_o[15:0];
 /*-----------------------------*/
 //control signal in ID stage
 	/*----For Decoder Module----*/
@@ -104,7 +116,6 @@ Internal signal
 	wire ALUSrc_1_select_o;
 	wire [4-1:0] ALUCtrl_o;
 	assign control_EXMEM_i = {control_IDEX_o[14-1:7],control_IDEX_o[2]};
-	//control_EXMEM_i = {Branch_o,MemToReg_o,BranchType_o,MemRead_o,MemWrite_o,RegWrite_o}
 /**** EX stage End****/
 
 /*------For EX/MEM Reg out------*/
@@ -171,6 +182,7 @@ ProgramCounter PC(
 	.clk_i(clk_i),
 	.rst_i (rst_i),
 	.pc_in_i(pc_number_in),
+	//.PCWrite_i(PCWrite_o),
 	.pc_out_o(pc_number)
         );
 
@@ -190,15 +202,16 @@ Pipe_Reg #(.size(64)) IF_ID(       //N is the total length of input/output
 	.clk_i(clk_i),
 	.rst_i(rst_i),
 	.data_i({pc_plus_four,instruction_o}),
-	.data_o(IFID_o)
+	.data_o({pc_plus_four_IFID_o,instruction_IFID_o})
+	//.data_o(IFID_o)
 	);
 
 //Instantiate the components in ID stage
 Reg_File RF(
 	.clk_i(clk_i),
 	.rst_i(rst_i),
-	.RSaddr_i(IFID_o[25:21]),
-	.RTaddr_i(IFID_o[20:16]),
+	.RSaddr_i(RSaddr_IFID_o),
+	.RTaddr_i(RTaddr_IFID_o),
 	.RDaddr_i(WriteReg_MEMWB_o),//Come from MEM/WB reg
 	.RDdata_i(WriteData_o),//Come from the MUX in MEM/WB stage
 	.RegWrite_i(RegWrite_WB),//Come from MEM/WB reg,control signal
@@ -208,7 +221,7 @@ Reg_File RF(
 	);
 
 Decoder Control(
-	.instr_op_i(IFID_o[31:26]),
+	.instr_op_i(opcode_IFID_o),
 	.Branch_o(Branch_o),
 	.MemToReg_o(MemToReg_o),
 	.BranchType_o(BranchType_o),
@@ -221,7 +234,7 @@ Decoder Control(
 	);
 
 Sign_Extend Sign_Extend(
-	.data_i(IFID_o[16-1:0]),
+	.data_i(Second_half_instr_IFID_o),
 	.data_o(SE_data_o)
 	);
 
