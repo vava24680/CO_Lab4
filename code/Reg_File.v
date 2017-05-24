@@ -47,9 +47,9 @@ The meaning of new syntax is that if we want to fetch some reg_file which is goi
 , we just assign the output data as the the new value which is going to be writen in a reg_file in thie cycle.
 */
 //assign RSdata_o = Reg_File[RSaddr_i] ;
-assign RSdata_o = RSaddr_i==RDaddr_i ? RDdata_i : Reg_File[RSaddr_i];
+assign RSdata_o = ((RSaddr_i==RDaddr_i) && RegWrite_i) ? RDdata_i : Reg_File[RSaddr_i];
 //assign RTdata_o = Reg_File[RTaddr_i] ;
-assign RTdata_o = RTaddr_i==RDaddr_i ? RDdata_i : Reg_File[RTaddr_i];/*-*/
+assign RTdata_o = ((RTaddr_i==RDaddr_i) && RegWrite_i) ? RDdata_i : Reg_File[RTaddr_i];/*-*/
 /*----------------------------------------------------------------------*/
 assign pre_equal_o = (RSdata_o==RTdata_o) ? 1'b1 : 1'b0;
 
