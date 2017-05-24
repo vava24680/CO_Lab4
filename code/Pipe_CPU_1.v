@@ -42,6 +42,7 @@ Internal signal
 	wire [6-1:0] opcode_IFID_o;
 	wire [5-1:0] RSaddr_IFID_o;
 	wire [5-1:0] RTaddr_IFID_o;
+	wire [5-1:0] RDaddr_IFID_o;
 	wire [16-1:0] Second_half_instr_IFID_o;
 	/*----For Reg_File Module----*/
 	wire [32-1:0] RSdata_o;
@@ -52,11 +53,11 @@ Internal signal
 	/*-------------------------------------*/
 	wire [32-1:0] pc_plus_four_IFID_o;
 	wire [32-1:0] shamt;
-	assign shamt = {27'b0,IFID_o[10:6]};
+	assign shamt = {27'b0,instruction_IFID_o[10:6]};
 	assign opcode_IFID_o = instruction_IFID_o[31:26];
 	assign RSaddr_IFID_o = instruction_IFID_o[25:21];
 	assign RTaddr_IFID_o = instruction_IFID_o[20:16];
-	assign RTaddr_IFID_o = instruction_IFID_o[15:11];
+	assign RDaddr_IFID_o = instruction_IFID_o[15:11];
 	assign Second_half_instr_IFID_o = instruction_IFID_o[15:0];
 /*-----------------------------*/
 //control signal in ID stage
@@ -72,8 +73,13 @@ Internal signal
 	wire  RegWrite_o;
 	wire [2-1:0] RegDst_o;
 	//wire Jump_type;//MUX eight is not used this time
-	/*##########################*/
 	wire pre_equal_o;
+	wire PCWrite_o;
+	wire Flush_IFID_o;
+	wire WritePipeReg_IFID_o;
+	wire ControlReset_ID_o;
+	wire ControlReset_EX_o;
+	wire ControlReset_MEM_o;
 	wire [14-1:0] control_IDEX_i;
 	assign control_IDEX_i = {Branch_o,MemToReg_o,BranchType_o,MemRead_o,MemWrite_o,
 	ALU_op_o,ALUSrc_2_select_o,RegWrite_o,RegDst_o};
@@ -111,10 +117,12 @@ Internal signal
 	wire ALUSrc_2_select_EX = control_IDEX_o[3];
 	wire [3-1:0] ALU_op_EX = control_IDEX_o[6:4];
 	wire [2-1:0] RegDst_EX = control_IDEX_o[1:0];
+	wire MemRead_EX;
 	wire [8-1:0] control_EXMEM_i;
 	/*For ALU_Ctrl Module*/
 	wire ALUSrc_1_select_o;
 	wire [4-1:0] ALUCtrl_o;
+	assign MemRead_EX = control_IDEX_o[8];
 	assign control_EXMEM_i = {control_IDEX_o[14-1:7],control_IDEX_o[2]};
 /**** EX stage End****/
 
@@ -146,7 +154,6 @@ Internal signal
 	assign MemWrite_MEM = control_EXMEM_o[1];
 	assign RegWrite_MEM = control_EXMEM_o[0];
 	assign control_MEMWB_i = {control_EXMEM_o[6:5],control_EXMEM_o[0]};
-	//control_MEMWB_i = {MemToReg_o,RegWrite_o}
 /**** MEM stage End ****/
 
 /*------For MEM/WB Reg out------*/
@@ -168,6 +175,7 @@ Internal signal
 Instnatiate modules
 ****************************************/
 wire fake_jump_type;
+
 //Instantiate the components in IF stage
 
 //First MUX, for selecting next pc number
@@ -182,8 +190,8 @@ ProgramCounter PC(
 	.clk_i(clk_i),
 	.rst_i (rst_i),
 	.pc_in_i(pc_number_in),
-	//.PCWrite_i(PCWrite_o),
-	.pc_out_o(pc_number)
+	.PCWrite_i(PCWrite_o),
+	.pc_next(pc_number)
         );
 
 Instr_Memory IM(
@@ -238,6 +246,20 @@ Sign_Extend Sign_Extend(
 	.data_o(SE_data_o)
 	);
 
+Hazara_Detection_Unit HDU(
+	.PCSrc_select_i(PCSrc_select_o),
+	.MemRead_EX_i(MemRead_EX),
+	.RSaddr_IFID_i(RSaddr_IFID_o),
+	.RTaddr_IFID_i(RTaddr_IFID_o),
+	.RTaddr_IDEX_i(RTaddr_IDEX_o),
+	.PCWrite_o(PCWrite_o),
+	.Flush_IFID_o(Flush_IFID_o),
+	.WritePipeReg_IFID_o(WritePipeReg_IFID_o),
+	.ControlReset_ID_o(ControlReset_ID_o),
+	.ControlReset_EX_o(ControlReset_EX_o),
+	.ControlReset_MEM_o(ControlReset_MEM_o)
+	);
+
 /*
 Pipe_Reg #(.size(184)) ID_EX(
 	.clk_i(clk_i),
@@ -249,7 +271,7 @@ Pipe_Reg #(.size(184)) ID_EX(
 Pipe_Reg #(.size(189)) ID_EX(
 	.clk_i(clk_i),
 	.rst_i(rst_i),
-	.data_i({control_IDEX_i,IFID_o[63:32],shamt,RSdata_o,RTdata_o,SE_data_o,IFID_o[25:21],IFID_o[20:16],IFID_o[15:11]}),
+	.data_i({control_IDEX_i, pc_plus_four_IFID_o, shamt, RSdata_o, RTdata_o, SE_data_o, RSaddr_IFID_o, RTaddr_IFID_o, RDaddr_IFID_o}),
 	.data_o({control_IDEX_o,pc_plus_four_IDEX_o,shamt_IDEX_o,RSdata_IDEX_o,RTdata_IDEX_o,SE_data_IDEX_o,RSaddr_IDEX_o,RTaddr_IDEX_o,RDaddr_2_IDEX_o})
 	);
 /*
