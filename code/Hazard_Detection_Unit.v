@@ -21,7 +21,7 @@ output Flush_IFID_o;
 output WritePipeReg_IFID_o;
 output ControlReset_ID_o;
 output ControlReset_EX_o;
-output ControlReset_MEM_o
+output ControlReset_MEM_o;
 reg PCWrite_o;
 reg Flush_IFID_o;
 reg WritePipeReg_IFID_o;
