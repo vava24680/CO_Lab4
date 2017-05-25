@@ -80,8 +80,9 @@ Internal signal
 	wire ControlReset_ID_o;
 	wire ControlReset_EX_o;
 	wire ControlReset_MEM_o;
-	wire [14-1:0] control_IDEX_i;
-	assign control_IDEX_i = {Branch_o,MemToReg_o,BranchType_o,MemRead_o,MemWrite_o,
+	wire [14-1:0] Ori_Control_ID;
+	wire [14-1:0] Real_Control_IDEX_i;
+	assign Ori_Control_ID = {Branch_o,MemToReg_o,BranchType_o,MemRead_o,MemWrite_o,
 	ALU_op_o,ALUSrc_2_select_o,RegWrite_o,RegDst_o};
 /**** ID stage End****/
 
@@ -260,19 +261,24 @@ Hazara_Detection_Unit HDU(
 	.ControlReset_EX_o(ControlReset_EX_o),
 	.ControlReset_MEM_o(ControlReset_MEM_o)
 	);
-
+MUX_2to1 #(.size(14)) Mux_ControlReset_ID(
+	.data0_i(Ori_Control_ID),
+	.data1_i(14'd0),
+	.select_i(ControlReset_ID_o),
+	.data_o(Real_Control_IDEX_i)
+	);
 /*
 Pipe_Reg #(.size(184)) ID_EX(
 	.clk_i(clk_i),
 	.rst_i(rst_i),
-	.data_i({control_IDEX_i,IFID_o[63:32],shamt,RSdata_o,RTdata_o,SE_data_o,IFID_o[20:16],IFID_o[15:11]}),
+	.data_i({Ori_Control_ID,IFID_o[63:32],shamt,RSdata_o,RTdata_o,SE_data_o,IFID_o[20:16],IFID_o[15:11]}),
 	.data_o({control_IDEX_o,pc_plus_four_IDEX_o,shamt_IDEX_o,RSdata_IDEX_o,RTdata_IDEX_o,SE_data_IDEX_o,RTaddr_IDEX_o,RDaddr_2_IDEX_o})
 	);
 */
 Pipe_Reg #(.size(189)) ID_EX(
 	.clk_i(clk_i),
 	.rst_i(rst_i),
-	.data_i({control_IDEX_i, pc_plus_four_IFID_o, shamt, RSdata_o, RTdata_o, SE_data_o, RSaddr_IFID_o, RTaddr_IFID_o, RDaddr_IFID_o}),
+	.data_i({Real_Control_IDEX_i, pc_plus_four_IFID_o, shamt, RSdata_o, RTdata_o, SE_data_o, RSaddr_IFID_o, RTaddr_IFID_o, RDaddr_IFID_o}),
 	.Pipe_Reg_Write_i(1'b1),
 	.data_o({control_IDEX_o,pc_plus_four_IDEX_o,shamt_IDEX_o,RSdata_IDEX_o,RTdata_IDEX_o,SE_data_IDEX_o,RSaddr_IDEX_o,RTaddr_IDEX_o,RDaddr_2_IDEX_o})
 	);
@@ -307,7 +313,7 @@ ALU_Ctrl ALU_Ctrl(
 	);
 Forwarding_Unit FWU(
 	.WriteReg_EXMEM_o(WriteReg_EXMEM_o),
-	.WriteReg_MEMWB_o(WriteReg_EXMEM_o),
+	.WriteReg_MEMWB_o(WriteReg_MEMWB_o),
 	.RegWrite_MEM(RegWrite_MEM),
 	.RegWrite_WB(RegWrite_WB),
 	.RSaddr_IDEX_o(RSaddr_IDEX_o),
@@ -319,7 +325,7 @@ Forwarding_Unit FWU(
 MUX_4to1 #(.size(32)) Mux_Opd_1_select(
 	.data0_i(RSdata_IDEX_o),
 	.data1_i(ALU_result_EXMEM_o),
-	.data2_i(ALU_result_MEMWB_o),
+	.data2_i(MEM_Read_data_MEMWB_o),
 	.data3_i(32'd0),
 	.select_i(Src1_Forward_select_o),
 	.data_o(opd_1_o)
@@ -328,7 +334,7 @@ MUX_4to1 #(.size(32)) Mux_Opd_1_select(
 MUX_4to1 #(.size(32)) Mux_Opd_2_select(
 	.data0_i(RTdata_IDEX_o),
 	.data1_i(ALU_result_EXMEM_o),
-	.data2_i(ALU_result_MEMWB_o),
+	.data2_i(MEM_Read_data_MEMWB_o),
 	.data3_i(32'd0),
 	.select_i(Src2_Forward_select_o),
 	.data_o(opd_2_o)
