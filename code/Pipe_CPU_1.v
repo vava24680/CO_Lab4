@@ -191,7 +191,7 @@ ProgramCounter PC(
 	.rst_i (rst_i),
 	.pc_in_i(pc_number_in),
 	.PCWrite_i(PCWrite_o),
-	.pc_next(pc_number)
+	.pc_out_o(pc_number)
         );
 
 Instr_Memory IM(
@@ -210,6 +210,7 @@ Pipe_Reg #(.size(64)) IF_ID(       //N is the total length of input/output
 	.clk_i(clk_i),
 	.rst_i(rst_i),
 	.data_i({pc_plus_four,instruction_o}),
+	.Pipe_Reg_Write_i(WritePipeReg_IFID_o),
 	.data_o({pc_plus_four_IFID_o,instruction_IFID_o})
 	//.data_o(IFID_o)
 	);
@@ -272,6 +273,7 @@ Pipe_Reg #(.size(189)) ID_EX(
 	.clk_i(clk_i),
 	.rst_i(rst_i),
 	.data_i({control_IDEX_i, pc_plus_four_IFID_o, shamt, RSdata_o, RTdata_o, SE_data_o, RSaddr_IFID_o, RTaddr_IFID_o, RDaddr_IFID_o}),
+	.Pipe_Reg_Write_i(1'b1),
 	.data_o({control_IDEX_o,pc_plus_four_IDEX_o,shamt_IDEX_o,RSdata_IDEX_o,RTdata_IDEX_o,SE_data_IDEX_o,RSaddr_IDEX_o,RTaddr_IDEX_o,RDaddr_2_IDEX_o})
 	);
 /*
@@ -375,6 +377,7 @@ Pipe_Reg #(.size(142)) EX_MEM(
 	.clk_i(clk_i),
 	.rst_i(rst_i),
 	.data_i({control_EXMEM_i, Branch_target_o, zero_o, result_o,RTdata_IDEX_o, WriteReg, SE_data_IDEX_o}),
+	.Pipe_Reg_Write_i(1'b1),
 	.data_o({control_EXMEM_o, Branch_target_EXMEM_o, zero_EXMEM_o, ALU_result_EXMEM_o, RTdata_EXMEM_o, WriteReg_EXMEM_o, SE_data_EXMEM_o})
 	);
 
@@ -401,6 +404,7 @@ Pipe_Reg #(.size(104)) MEM_WB(
 	.clk_i(clk_i),
 	.rst_i(rst_i),
 	.data_i({control_MEMWB_i, MEM_Read_data_o, ALU_result_EXMEM_o, WriteReg_EXMEM_o, SE_data_EXMEM_o}),
+	.Pipe_Reg_Write_i(1'b1),
 	.data_o({control_MEMWB_o, MEM_Read_data_MEMWB_o, ALU_result_MEMWB_o, WriteReg_MEMWB_o, SE_data_MEMWB_o})
 	);
 
