@@ -414,12 +414,12 @@ MUX_4to1 #(.size(1)) Mux_Branch_Type(
 	.select_i(BranchType_MEM),
 	.data_o(type_branch_o)
 	);
-MUX_2to1 #(.size(3)) Mux_ControlReset_MEM(
+/*MUX_2to1 #(.size(3)) Mux_ControlReset_MEM(
 	.data0_i(Ori_Control_MEM),
 	.data1_i(3'd0),
 	.select_i(ControlReset_MEM_o),
 	.data_o(Real_Control_MEMWB_i)
-	);
+	);*/
 Pipe_Reg #(.size(104)) MEM_WB(
 	.clk_i(clk_i),
 	.rst_i(rst_i),
