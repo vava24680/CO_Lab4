@@ -119,12 +119,13 @@ Internal signal
 	wire [3-1:0] ALU_op_EX = control_IDEX_o[6:4];
 	wire [2-1:0] RegDst_EX = control_IDEX_o[1:0];
 	wire MemRead_EX;
-	wire [8-1:0] control_EXMEM_i;
+	wire [8-1:0] Ori_Control_EX;
+	wire [8-1:0] Real_Control_EXMEM_i;
 	/*For ALU_Ctrl Module*/
 	wire ALUSrc_1_select_o;
 	wire [4-1:0] ALUCtrl_o;
 	assign MemRead_EX = control_IDEX_o[8];
-	assign control_EXMEM_i = {control_IDEX_o[14-1:7],control_IDEX_o[2]};
+	assign Ori_Control_EX = {control_IDEX_o[14-1:7],control_IDEX_o[2]};
 /**** EX stage End****/
 
 /*------For EX/MEM Reg out------*/
@@ -148,13 +149,14 @@ Internal signal
 	wire MemRead_MEM;
 	wire MemWrite_MEM;
 	wire RegWrite_MEM;
-	wire [3-1:0] control_MEMWB_i;
+	wire [3-1:0] Ori_Control_MEM;
+	wire [3-1:0] Real_Control_MEMWB_i;
 	assign Branch_MEM = control_EXMEM_o[7];
 	assign BranchType_MEM = control_EXMEM_o[4:3];
 	assign MemRead_MEM = control_EXMEM_o[2];
 	assign MemWrite_MEM = control_EXMEM_o[1];
 	assign RegWrite_MEM = control_EXMEM_o[0];
-	assign control_MEMWB_i = {control_EXMEM_o[6:5],control_EXMEM_o[0]};
+	assign Ori_Control_MEM = {control_EXMEM_o[6:5],control_EXMEM_o[0]};
 /**** MEM stage End ****/
 
 /*------For MEM/WB Reg out------*/
@@ -193,6 +195,7 @@ ProgramCounter PC(
 	.pc_in_i(pc_number_in),
 	.PCWrite_i(PCWrite_o),
 	.pc_out_o(pc_number)
+	//.pc_next(pc_number)
         );
 
 Instr_Memory IM(
@@ -362,6 +365,12 @@ MUX_4to1 #(.size(5)) Mux_RegDst_Select(
 	.select_i(RegDst_EX),
 	.data_o(WriteReg)
 	);
+MUX_2to1 #(.size(8)) Mux_ControlReset_EX(
+	.data0_i(Ori_Control_EX),
+	.data1_i(8'd0),
+	.select_i(ControlReset_EX_o),
+	.data_o(Real_Control_EXMEM_i)
+	);
 ALU ALU(
 	.rst(rst_i),
 	.src1_i(ALU_src_1),
@@ -382,7 +391,7 @@ Adder Adder_For_BranchTarget(
 Pipe_Reg #(.size(142)) EX_MEM(
 	.clk_i(clk_i),
 	.rst_i(rst_i),
-	.data_i({control_EXMEM_i, Branch_target_o, zero_o, result_o,RTdata_IDEX_o, WriteReg, SE_data_IDEX_o}),
+	.data_i({Ori_Control_EX, Branch_target_o, zero_o, result_o,RTdata_IDEX_o, WriteReg, SE_data_IDEX_o}),
 	.Pipe_Reg_Write_i(1'b1),
 	.data_o({control_EXMEM_o, Branch_target_EXMEM_o, zero_EXMEM_o, ALU_result_EXMEM_o, RTdata_EXMEM_o, WriteReg_EXMEM_o, SE_data_EXMEM_o})
 	);
@@ -405,11 +414,16 @@ MUX_4to1 #(.size(1)) Mux_Branch_Type(
 	.select_i(BranchType_MEM),
 	.data_o(type_branch_o)
 	);
-
+MUX_2to1 #(.size(3)) Mux_ControlReset_MEM(
+	.data0_i(Ori_Control_MEM),
+	.data1_i(3'd0),
+	.select_i(ControlReset_MEM_o),
+	.data_o(Real_Control_MEMWB_i)
+	);
 Pipe_Reg #(.size(104)) MEM_WB(
 	.clk_i(clk_i),
 	.rst_i(rst_i),
-	.data_i({control_MEMWB_i, MEM_Read_data_o, ALU_result_EXMEM_o, WriteReg_EXMEM_o, SE_data_EXMEM_o}),
+	.data_i({Ori_Control_MEM, MEM_Read_data_o, ALU_result_EXMEM_o, WriteReg_EXMEM_o, SE_data_EXMEM_o}),
 	.Pipe_Reg_Write_i(1'b1),
 	.data_o({control_MEMWB_o, MEM_Read_data_MEMWB_o, ALU_result_MEMWB_o, WriteReg_MEMWB_o, SE_data_MEMWB_o})
 	);
