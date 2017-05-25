@@ -22,21 +22,21 @@ input           clk_i;
 input	        rst_i;
 input  [32-1:0] pc_in_i;
 input PCWrite_i;
-//output [32-1:0] pc_next;
+//output  [32-1:0] pc_next;
 output [32-1:0] pc_out_o;
 
 //Internal Signals
 reg    [32-1:0] pc_out_o;
 
 //Parameter
-wire [32-1:0] Original_PC;
+//wire [32-1:0] Original_PC;
 //assign Original_PC = pc_in_i-32'd4;
-Adder subtract(
+/*Adder subtract(
 	.src1_i(pc_in_i),
 	.src2_i(-32'd4),
 	.sum_o(Original_PC)
-	);
-
+	);*/
+//assign pc_next = PCWrite_i ? pc_out_o : Original_PC;
 
 //assign pc_next = PCWrite_i ? pc_out_o : Original_PC;
 
