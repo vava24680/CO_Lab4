@@ -33,7 +33,7 @@ Src1, Src2, operand source           -
 
 always @ ( * ) begin
 	//Case1, WriteReg_EXMEM_o has data dependency with RSaddr_IDEX_o
-	if(WriteReg_EXMEM_o==RSaddr_IDEX_o)
+	/*if(WriteReg_EXMEM_o==RSaddr_IDEX_o)
 		begin
 			if(RegWrite_MEM && WriteReg_EXMEM_o!=5'd0)
 				begin
@@ -55,9 +55,97 @@ always @ ( * ) begin
 	else
 		begin
 			Src1_Forward_select_o = 2'b00;
+		end*/
+	if(WriteReg_EXMEM_o==RSaddr_IDEX_o || WriteReg_MEMWB_o==RSaddr_IDEX_o)
+		begin
+			if(WriteReg_EXMEM_o==RSaddr_IDEX_o && WriteReg_MEMWB_o==RSaddr_IDEX_o)
+				begin
+					if(RegWrite_MEM && WriteReg_EXMEM_o!=5'd0)
+						begin
+							Src1_Forward_select_o = 2'b01;
+						end
+					else if(RegWrite_WB && WriteReg_MEMWB_o!=5'd0)
+						begin
+							Src1_Forward_select_o = 2'b10;
+						end
+					else
+						begin
+							Src1_Forward_select_o = 2'b00;
+						end
+				end
+			else if(WriteReg_EXMEM_o==RSaddr_IDEX_o)
+				begin
+					if(RegWrite_MEM && WriteReg_EXMEM_o!=5'd0)
+						begin
+							Src1_Forward_select_o = 2'b01;
+						end
+					else
+						begin
+							Src1_Forward_select_o = 2'b00;
+						end
+				end
+			else
+				begin
+					if(RegWrite_WB && WriteReg_MEMWB_o!=5'd0)
+						begin
+							Src1_Forward_select_o = 2'b10;
+						end
+					else
+						begin
+							Src1_Forward_select_o = 2'b00;
+						end
+				end
+		end
+	else
+		begin
+			Src1_Forward_select_o = 2'b00;
 		end
 
-	if(WriteReg_EXMEM_o==RTaddr_IDEX_o)
+	if(WriteReg_EXMEM_o==RTaddr_IDEX_o || WriteReg_MEMWB_o==RTaddr_IDEX_o)
+		begin
+			if(WriteReg_EXMEM_o==RTaddr_IDEX_o && WriteReg_MEMWB_o==RTaddr_IDEX_o)
+				begin
+					if(RegWrite_MEM && WriteReg_EXMEM_o!=5'd0)
+						begin
+							Src2_Forward_select_o = 2'b01;
+						end
+					else if(RegWrite_WB && WriteReg_MEMWB_o!=5'd0)
+						begin
+							Src2_Forward_select_o = 2'b10;
+						end
+					else
+						begin
+							Src2_Forward_select_o = 2'b00;
+						end
+				end
+			else if(WriteReg_EXMEM_o==RTaddr_IDEX_o)
+				begin
+					if(RegWrite_MEM && WriteReg_EXMEM_o!=5'd0)
+						begin
+							Src2_Forward_select_o = 2'b01;
+						end
+					else
+						begin
+							Src2_Forward_select_o = 2'b00;
+						end
+				end
+			else
+				begin
+					if(RegWrite_WB && WriteReg_MEMWB_o!=5'd0)
+						begin
+							Src2_Forward_select_o = 2'b10;
+						end
+					else
+						begin
+							Src2_Forward_select_o = 2'b00;
+						end
+				end
+		end
+	else
+		begin
+			Src2_Forward_select_o = 2'b00;
+		end
+	/*if(WriteReg_EXMEM_o==RTaddr_IDEX_o)
 		begin
 			if(RegWrite_MEM && WriteReg_EXMEM_o!=5'd0)
 				begin
@@ -79,7 +167,8 @@ always @ ( * ) begin
 	else
 		begin
 			Src2_Forward_select_o = 2'b00;
-		end
+		end*/
+
 	/*if(WriteReg_EXMEM_o==RSaddr_IDEX_o)
 		begin
 			if(RegWrite_MEM && WriteReg_EXMEM_o!=5'd0)
