@@ -215,6 +215,7 @@ Pipe_Reg #(.size(64)) IF_ID(       //N is the total length of input/output
 	.rst_i(rst_i),
 	.data_i({pc_plus_four,instruction_o}),
 	.Pipe_Reg_Write_i(WritePipeReg_IFID_o),
+	.Flush_i(PCSrc_select_o),
 	.data_o({pc_plus_four_IFID_o,instruction_IFID_o})
 	//.data_o(IFID_o)
 	);
@@ -251,7 +252,7 @@ Sign_Extend Sign_Extend(
 	.data_o(SE_data_o)
 	);
 
-Hazara_Detection_Unit HDU(
+Hazard_Detection_Unit HDU(
 	.PCSrc_select_i(PCSrc_select_o),
 	.MemRead_EX_i(MemRead_EX),
 	.RSaddr_IFID_i(RSaddr_IFID_o),
@@ -267,7 +268,7 @@ Hazara_Detection_Unit HDU(
 MUX_2to1 #(.size(14)) Mux_ControlReset_ID(
 	.data0_i(Ori_Control_ID),
 	.data1_i(14'd0),
-	.select_i(ControlReset_ID_o),
+	.select_i((ControlReset_ID_o | PCSrc_select_o)),
 	.data_o(Real_Control_IDEX_i)
 	);
 /*
@@ -283,6 +284,7 @@ Pipe_Reg #(.size(189)) ID_EX(
 	.rst_i(rst_i),
 	.data_i({Real_Control_IDEX_i, pc_plus_four_IFID_o, shamt, RSdata_o, RTdata_o, SE_data_o, RSaddr_IFID_o, RTaddr_IFID_o, RDaddr_IFID_o}),
 	.Pipe_Reg_Write_i(1'b1),
+	.Flush_i(PCSrc_select_o),
 	.data_o({control_IDEX_o,pc_plus_four_IDEX_o,shamt_IDEX_o,RSdata_IDEX_o,RTdata_IDEX_o,SE_data_IDEX_o,RSaddr_IDEX_o,RTaddr_IDEX_o,RDaddr_2_IDEX_o})
 	);
 /*
@@ -328,7 +330,7 @@ Forwarding_Unit FWU(
 MUX_4to1 #(.size(32)) Mux_Opd_1_select(
 	.data0_i(RSdata_IDEX_o),
 	.data1_i(ALU_result_EXMEM_o),
-	.data2_i(MEM_Read_data_MEMWB_o),
+	.data2_i(WriteData_o),
 	.data3_i(32'd0),
 	.select_i(Src1_Forward_select_o),
 	.data_o(opd_1_o)
@@ -337,7 +339,7 @@ MUX_4to1 #(.size(32)) Mux_Opd_1_select(
 MUX_4to1 #(.size(32)) Mux_Opd_2_select(
 	.data0_i(RTdata_IDEX_o),
 	.data1_i(ALU_result_EXMEM_o),
-	.data2_i(MEM_Read_data_MEMWB_o),
+	.data2_i(WriteData_o),
 	.data3_i(32'd0),
 	.select_i(Src2_Forward_select_o),
 	.data_o(opd_2_o)
@@ -368,7 +370,7 @@ MUX_4to1 #(.size(5)) Mux_RegDst_Select(
 MUX_2to1 #(.size(8)) Mux_ControlReset_EX(
 	.data0_i(Ori_Control_EX),
 	.data1_i(8'd0),
-	.select_i(ControlReset_EX_o),
+	.select_i((ControlReset_EX_o | PCSrc_select_o)),
 	.data_o(Real_Control_EXMEM_i)
 	);
 ALU ALU(
@@ -393,6 +395,7 @@ Pipe_Reg #(.size(142)) EX_MEM(
 	.rst_i(rst_i),
 	.data_i({Ori_Control_EX, Branch_target_o, zero_o, result_o,RTdata_IDEX_o, WriteReg, SE_data_IDEX_o}),
 	.Pipe_Reg_Write_i(1'b1),
+	.Flush_i(PCSrc_select_o),
 	.data_o({control_EXMEM_o, Branch_target_EXMEM_o, zero_EXMEM_o, ALU_result_EXMEM_o, RTdata_EXMEM_o, WriteReg_EXMEM_o, SE_data_EXMEM_o})
 	);
 
@@ -425,6 +428,7 @@ Pipe_Reg #(.size(104)) MEM_WB(
 	.rst_i(rst_i),
 	.data_i({Ori_Control_MEM, MEM_Read_data_o, ALU_result_EXMEM_o, WriteReg_EXMEM_o, SE_data_EXMEM_o}),
 	.Pipe_Reg_Write_i(1'b1),
+	.Flush_i(1'b0),
 	.data_o({control_MEMWB_o, MEM_Read_data_MEMWB_o, ALU_result_MEMWB_o, WriteReg_MEMWB_o, SE_data_MEMWB_o})
 	);
 
