@@ -1,4 +1,4 @@
-module Hazara_Detection_Unit(
+module Hazard_Detection_Unit(
 	PCSrc_select_i,
 	MemRead_EX_i,
 	RSaddr_IFID_i,
