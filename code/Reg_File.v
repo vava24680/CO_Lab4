@@ -2,8 +2,7 @@
 //--------------------------------------------------------------------------------
 //Version:     1
 //--------------------------------------------------------------------------------
-//Writer:0416315王定偉, 0416005張彧豪
-//----------------------------------------------
+//Writer:0416315�� 0416005張彧��//----------------------------------------------
 //Date:
 //----------------------------------------------
 //Description:
@@ -57,7 +56,7 @@ assign pre_equal_o = (RSdata_o==RTdata_o) ? 1'b1 : 1'b0;
 //Writing data when postive edge clk_i and RegWrite_i was set.
 always @( posedge rst_i or posedge clk_i  ) begin
     if(rst_i == 0) begin
-	    Reg_File[0]  <= 32'b0; Reg_File[1]  <= 32'b0; Reg_File[2]  <= 32'd0; Reg_File[3]  <= 32'b0;
+	    Reg_File[0]  <= 0; Reg_File[1]  <= 0; Reg_File[2]  <= 0; Reg_File[3]  <= 0;
 	    Reg_File[4]  <= 0; Reg_File[5]  <= 0; Reg_File[6]  <= 0; Reg_File[7]  <= 0;
         Reg_File[8]  <= 0; Reg_File[9]  <= 0; Reg_File[10] <= 0; Reg_File[11] <= 0;
 	    Reg_File[12] <= 0; Reg_File[13] <= 0; Reg_File[14] <= 0; Reg_File[15] <= 0;
