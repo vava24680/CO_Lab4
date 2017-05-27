@@ -10,7 +10,7 @@
 //Description:
 //--------------------------------------------------------------------------------
 
-module alu_top(
+module alu_top( 
                src1,       //1 bit source 1 (input)
                src2,       //1 bit source 2 (input)
                less,       //1 bit less     (input)
