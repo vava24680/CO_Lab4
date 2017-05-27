@@ -27,14 +27,13 @@ input  [6-1:0] instr_op_i;
 
 output  Branch_o;
 output [2-1:0] MemToReg_o;
-output [2-1:0] BranchType_o;//Need to know certain bits
+output [2-1:0] BranchType_o;
 //output  Jump_o;     //Need to know certain bits
 output  MemRead_o;
 output  MemWrite_o;
 output [3-1:0] ALU_op_o;
 output  ALUSrc_o;
 output  RegWrite_o;
-//output  RegDst_o;
 output [2-1:0] RegDst_o;
 //Internal Signals
 reg  Branch_o;

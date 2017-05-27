@@ -79,7 +79,6 @@ Internal signal
 	wire WritePipeReg_IFID_o;
 	wire ControlReset_ID_o;
 	wire ControlReset_EX_o;
-	wire ControlReset_MEM_o;
 	wire [14-1:0] Ori_Control_ID;
 	wire [14-1:0] Real_Control_IDEX_i;
 	assign Ori_Control_ID = {Branch_o,MemToReg_o,BranchType_o,MemRead_o,MemWrite_o,
@@ -261,8 +260,7 @@ Hazard_Detection_Unit HDU(
 	.Flush_IFID_o(Flush_IFID_o),
 	.WritePipeReg_IFID_o(WritePipeReg_IFID_o),
 	.ControlReset_ID_o(ControlReset_ID_o),
-	.ControlReset_EX_o(ControlReset_EX_o),
-	.ControlReset_MEM_o(ControlReset_MEM_o)
+	.ControlReset_EX_o(ControlReset_EX_o)
 	);
 MUX_2to1 #(.size(14)) Mux_ControlReset_ID(
 	.data0_i(Ori_Control_ID),
@@ -384,7 +382,7 @@ Adder Adder_For_BranchTarget(
 Pipe_Reg #(.size(142)) EX_MEM(
 	.clk_i(clk_i),
 	.rst_i(rst_i),
-	.data_i({Ori_Control_EX, Branch_target_o, zero_o, result_o,RTdata_IDEX_o, WriteReg, SE_data_IDEX_o}),
+	.data_i({Real_Control_EXMEM_i, Branch_target_o, zero_o, result_o,RTdata_IDEX_o, WriteReg, SE_data_IDEX_o}),
 	.Pipe_Reg_Write_i(1'b1),
 	.Flush_i(PCSrc_select_o),
 	.data_o({control_EXMEM_o, Branch_target_EXMEM_o, zero_EXMEM_o, ALU_result_EXMEM_o, RTdata_EXMEM_o, WriteReg_EXMEM_o, SE_data_EXMEM_o})
