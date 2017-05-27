@@ -214,10 +214,9 @@ Pipe_Reg #(.size(64)) IF_ID(       //N is the total length of input/output
 	.clk_i(clk_i),
 	.rst_i(rst_i),
 	.data_i({pc_plus_four,instruction_o}),
-	.Pipe_Reg_Write_i(WritePipeReg_IFID_o),
-	.Flush_i(PCSrc_select_o),
+	.Pipe_Reg_Write_i(WritePipeReg_IFID_o),//Come from HDU
+	.Flush_i(PCSrc_select_o),//Come from Branch AND Gate
 	.data_o({pc_plus_four_IFID_o,instruction_IFID_o})
-	//.data_o(IFID_o)
 	);
 
 //Instantiate the components in ID stage
@@ -253,7 +252,7 @@ Sign_Extend Sign_Extend(
 	);
 
 Hazard_Detection_Unit HDU(
-	.PCSrc_select_i(PCSrc_select_o),
+	.PCSrc_select_i(PCSrc_select_o),//Come from Branch AND Gate
 	.MemRead_EX_i(MemRead_EX),
 	.RSaddr_IFID_i(RSaddr_IFID_o),
 	.RTaddr_IFID_i(RTaddr_IFID_o),
@@ -271,20 +270,12 @@ MUX_2to1 #(.size(14)) Mux_ControlReset_ID(
 	.select_i((ControlReset_ID_o | PCSrc_select_o)),
 	.data_o(Real_Control_IDEX_i)
 	);
-/*
-Pipe_Reg #(.size(184)) ID_EX(
-	.clk_i(clk_i),
-	.rst_i(rst_i),
-	.data_i({Ori_Control_ID,IFID_o[63:32],shamt,RSdata_o,RTdata_o,SE_data_o,IFID_o[20:16],IFID_o[15:11]}),
-	.data_o({control_IDEX_o,pc_plus_four_IDEX_o,shamt_IDEX_o,RSdata_IDEX_o,RTdata_IDEX_o,SE_data_IDEX_o,RTaddr_IDEX_o,RDaddr_2_IDEX_o})
-	);
-*/
 Pipe_Reg #(.size(189)) ID_EX(
 	.clk_i(clk_i),
 	.rst_i(rst_i),
 	.data_i({Real_Control_IDEX_i, pc_plus_four_IFID_o, shamt, RSdata_o, RTdata_o, SE_data_o, RSaddr_IFID_o, RTaddr_IFID_o, RDaddr_IFID_o}),
 	.Pipe_Reg_Write_i(1'b1),
-	.Flush_i(PCSrc_select_o),
+	.Flush_i(PCSrc_select_o),//Come from Branch AND Gate
 	.data_o({control_IDEX_o,pc_plus_four_IDEX_o,shamt_IDEX_o,RSdata_IDEX_o,RTdata_IDEX_o,SE_data_IDEX_o,RSaddr_IDEX_o,RTaddr_IDEX_o,RDaddr_2_IDEX_o})
 	);
 /*
@@ -417,12 +408,6 @@ MUX_4to1 #(.size(1)) Mux_Branch_Type(
 	.select_i(BranchType_MEM),
 	.data_o(type_branch_o)
 	);
-/*MUX_2to1 #(.size(3)) Mux_ControlReset_MEM(
-	.data0_i(Ori_Control_MEM),
-	.data1_i(3'd0),
-	.select_i(ControlReset_MEM_o),
-	.data_o(Real_Control_MEMWB_i)
-	);*/
 Pipe_Reg #(.size(104)) MEM_WB(
 	.clk_i(clk_i),
 	.rst_i(rst_i),
