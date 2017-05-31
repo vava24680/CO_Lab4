@@ -38,7 +38,7 @@ ALU_op_o,set of operation      -
    011  ,   Addi,lw,sw         -
    100  ,   LUI                -
    101  ,   ORI                -
-   110  ,   LI                 -//Need confirmation
+   110  ,   LI                -//Need confirmation
    111  ,   Don't care use     -
 ---------------------------------
 */
@@ -47,7 +47,7 @@ ALU_op_o,set of operation      -
 ALUCtrl_o,operation             -
    0000  ,   AND                -
    0001  ,   OR                 -
-   0010  ,   ADD,LW,SW          -
+   0010  ,   ADD,LW,SW,LI       -
    0011  ,   Shift_Left         -
    0100  ,   LUI                -
    0101  ,   MUL                -
@@ -93,13 +93,17 @@ always @ ( * ) begin
 			begin
 				{ALUSrc_1_o,ALUCtrl_o,Jump_type} = 6'b000100;
 			end
-		3'b100://LI
+		3'b100://LUI
 			begin
 				{ALUSrc_1_o,ALUCtrl_o,Jump_type} = 6'b001000;
 			end
 		3'b101://ORI
 			begin
 				{ALUSrc_1_o,ALUCtrl_o,Jump_type} = 6'b000010;
+			end
+		3'b110://LI
+			begin
+				{ALUSrc_1_o,ALUCtrl_o,Jump_type} = 6'b000100;
 			end
 		default:
 			begin
