@@ -181,7 +181,7 @@ always @ ( * ) begin
 				RegWrite_o = 1'b1;
 				RegDst_o = 2'b00;
 			end
-		6'd15://For LI
+		6'd15://For LUI
 			begin
 				Branch_o = 1'b0;
 				MemToReg_o = 2'b10;
@@ -189,7 +189,8 @@ always @ ( * ) begin
 				Jump_o = 1'b0;
 				MemRead_o = 1'b0;
 				MemWrite_o = 1'b0;
-				ALU_op_o = 3'b110;
+				//ALU_op_o = 3'b110;
+				ALU_op_o = 3'b100;
 				ALUSrc_o = 1'b0;
 				RegWrite_o = 1'b1;
 				RegDst_o = 2'b00;
