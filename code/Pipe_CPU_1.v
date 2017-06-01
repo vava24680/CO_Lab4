@@ -75,7 +75,6 @@ Internal signal
 	//wire Jump_type;//MUX eight is not used this time
 	wire pre_equal_o;
 	wire PCWrite_o;
-	wire Flush_IFID_o;
 	wire WritePipeReg_IFID_o;
 	wire ControlReset_ID_o;
 	wire ControlReset_EX_o;
@@ -251,13 +250,11 @@ Sign_Extend Sign_Extend(
 	);
 
 Hazard_Detection_Unit HDU(
-	.PCSrc_select_i(PCSrc_select_o),//Come from Branch AND Gate
 	.MemRead_EX_i(MemRead_EX),
 	.RSaddr_IFID_i(RSaddr_IFID_o),
 	.RTaddr_IFID_i(RTaddr_IFID_o),
 	.RTaddr_IDEX_i(RTaddr_IDEX_o),
 	.PCWrite_o(PCWrite_o),
-	.Flush_IFID_o(Flush_IFID_o),
 	.WritePipeReg_IFID_o(WritePipeReg_IFID_o),
 	.ControlReset_ID_o(ControlReset_ID_o),
 	.ControlReset_EX_o(ControlReset_EX_o)
